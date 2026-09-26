@@ -20,3 +20,10 @@ body {
   width: 100%;
   background-color: #dddddd;
 }
+
+.node {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background-color: blue;
+}
