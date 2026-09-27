@@ -3,6 +3,9 @@ const coordinateEl = document.querySelector('.coordinate');
 
 const workspaceRect = workspaceEl.getBoundingClientRect();
 
+let previousX;
+let previousY;
+
 function myNode() {
   const nodeList = [];
   let nodeId = 0;
@@ -23,13 +26,13 @@ function myNode() {
 
   function dragNode(id, x, y) {
     const seletedNode = nodeList.find((node) => node.id === Number(id));
-    console.log(seletedNode);
-    if (seletedNode.isDragging) {
-      seletedNode.x = x;
-      seletedNode.y = y;
 
-      seletedNode.element.style.top = `${y}px`;
-      seletedNode.element.style.left = `${x}px`;
+    if (seletedNode.isDragging) {
+      seletedNode.x += x;
+      seletedNode.y += y;
+
+      seletedNode.element.style.top = `${seletedNode.y}px`;
+      seletedNode.element.style.left = `${seletedNode.x}px`;
     }
   }
 
@@ -38,20 +41,23 @@ function myNode() {
     node.element.classList = 'node';
     node.element.style = `top: ${node.y}px; left: ${node.x}px`;
 
-    node.element.addEventListener('pointerdown', handlePointerDown);
-    node.element.addEventListener('pointerup', handlePointerUp);
+    node.element.addEventListener('pointerdown', handlePointerdown);
+    node.element.addEventListener('pointerup', handlePointerup);
 
     workspaceEl.appendChild(node.element);
   }
 
-  function handlePointerDown(e) {
+  function handlePointerdown(e) {
     const seletedNode = nodeList.find(
       (node) => node.id === Number(e.target.id),
     );
     seletedNode.isDragging = true;
+
+    previousX = e.clientX;
+    previousY = e.clientY;
   }
 
-  function handlePointerUp(e) {
+  function handlePointerup(e) {
     const seletedNode = nodeList.find(
       (node) => node.id === Number(e.target.id),
     );
@@ -84,6 +90,12 @@ workspaceEl.addEventListener('pointermove', (e) => {
   `;
 
   if (e.target.classList.contains('node')) {
-    node.dragNode(e.target.id, workspaceX, workspaceY);
+    const deltaX = e.clientX - previousX;
+    const deltaY = e.clientY - previousY;
+
+    previousX = e.clientX;
+    previousY = e.clientY;
+
+    node.dragNode(e.target.id, deltaX, deltaY);
   }
 });
