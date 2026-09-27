@@ -19,6 +19,7 @@ body {
   position: relative;
   width: 100%;
   background-color: #dddddd;
+  overflow: hidden;
 }
 
 .node {
