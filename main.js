@@ -15,7 +15,6 @@ function myNode() {
       x,
       y,
       id: nodeId,
-      isDragging: false,
       element: document.createElement('div'),
     };
 
@@ -24,16 +23,14 @@ function myNode() {
     nodeId++;
   }
 
-  function dragNode(id, x, y) {
+  function moveNode(id, x, y) {
     const seletedNode = nodeList.find((node) => node.id === Number(id));
 
-    if (seletedNode.isDragging) {
-      seletedNode.x += x;
-      seletedNode.y += y;
+    seletedNode.x += x;
+    seletedNode.y += y;
 
-      seletedNode.element.style.top = `${seletedNode.y}px`;
-      seletedNode.element.style.left = `${seletedNode.x}px`;
-    }
+    seletedNode.element.style.top = `${seletedNode.y}px`;
+    seletedNode.element.style.left = `${seletedNode.x}px`;
   }
 
   function render(node) {
@@ -48,23 +45,17 @@ function myNode() {
   }
 
   function handlePointerdown(e) {
-    const seletedNode = nodeList.find(
-      (node) => node.id === Number(e.target.id),
-    );
-    seletedNode.isDragging = true;
+    e.target.setPointerCapture(e.pointerId);
 
     previousX = e.clientX;
     previousY = e.clientY;
   }
 
   function handlePointerup(e) {
-    const seletedNode = nodeList.find(
-      (node) => node.id === Number(e.target.id),
-    );
-    seletedNode.isDragging = false;
+    e.target.releasePointerCapture(e.pointerId);
   }
 
-  return { createNode, dragNode };
+  return { createNode, moveNode };
 }
 
 const node = myNode();
@@ -89,13 +80,16 @@ workspaceEl.addEventListener('pointermove', (e) => {
     <div>좌표 y: ${workspaceY}</div>
   `;
 
-  if (e.target.classList.contains('node')) {
+  if (
+    e.target.classList.contains('node') &&
+    e.target.hasPointerCapture(e.pointerId)
+  ) {
     const deltaX = e.clientX - previousX;
     const deltaY = e.clientY - previousY;
 
     previousX = e.clientX;
     previousY = e.clientY;
 
-    node.dragNode(e.target.id, deltaX, deltaY);
+    node.moveNode(e.target.id, deltaX, deltaY);
   }
 });
