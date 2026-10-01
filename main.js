@@ -11,6 +11,7 @@ let previousY;
 const world = {
   panX: 0,
   panY: 0,
+  scale: 1,
 };
 
 function nodes() {
@@ -89,4 +90,10 @@ viewportEl.addEventListener('pointermove', (e) => {
 
     worldEl.style.transform = `translate(${world.panX}px, ${world.panY}px)`;
   }
+});
+
+viewportEl.addEventListener('wheel', (e) => {
+  world.scale += e.deltaY * -0.01;
+
+  worldEl.style.transform = `scale(${world.scale})`;
 });
