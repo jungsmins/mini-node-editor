@@ -1,12 +1,19 @@
-const workspaceEl = document.querySelector('.workspace');
+const viewportEl = document.querySelector('.viewport');
+const worldEl = document.querySelector('.world');
 const coordinateEl = document.querySelector('.coordinate');
+const buttonEl = document.querySelector('button');
 
-const workspaceRect = workspaceEl.getBoundingClientRect();
+const viewportRect = viewportEl.getBoundingClientRect();
 
 let previousX;
 let previousY;
 
-function myNode() {
+const world = {
+  panX: 0,
+  panY: 0,
+};
+
+function nodes() {
   const nodeList = [];
   let nodeId = 0;
 
@@ -29,8 +36,7 @@ function myNode() {
     seletedNode.x += x;
     seletedNode.y += y;
 
-    seletedNode.element.style.top = `${seletedNode.y}px`;
-    seletedNode.element.style.left = `${seletedNode.x}px`;
+    seletedNode.element.style.transform = `translate(${seletedNode.x}px, ${seletedNode.y}px)`;
   }
 
   function render(node) {
@@ -38,58 +44,49 @@ function myNode() {
     node.element.classList = 'node';
     node.element.style = `top: ${node.y}px; left: ${node.x}px`;
 
-    node.element.addEventListener('pointerdown', handlePointerdown);
-    node.element.addEventListener('pointerup', handlePointerup);
-
-    workspaceEl.appendChild(node.element);
-  }
-
-  function handlePointerdown(e) {
-    e.target.setPointerCapture(e.pointerId);
-
-    previousX = e.clientX;
-    previousY = e.clientY;
-  }
-
-  function handlePointerup(e) {
-    e.target.releasePointerCapture(e.pointerId);
+    worldEl.appendChild(node.element);
   }
 
   return { createNode, moveNode };
 }
 
-const node = myNode();
+const node = nodes();
 
-workspaceEl.addEventListener('pointerdown', (e) => {
-  if (e.target.classList.contains('node')) {
-    return;
-  }
-
-  const workspaceX = e.clientX - workspaceRect.x;
-  const workspaceY = e.clientY - workspaceRect.y;
-
-  node.createNode(workspaceX, workspaceY);
+buttonEl.addEventListener('click', () => {
+  node.createNode(0, 0);
 });
 
-workspaceEl.addEventListener('pointermove', (e) => {
-  const workspaceX = e.clientX - workspaceRect.x;
-  const workspaceY = e.clientY - workspaceRect.y;
+viewportEl.addEventListener('pointerdown', (e) => {
+  e.target.setPointerCapture(e.pointerId);
+
+  previousX = e.clientX;
+  previousY = e.clientY;
+});
+
+viewportEl.addEventListener('pointermove', (e) => {
+  const workspaceX = e.clientX - viewportRect.x;
+  const workspaceY = e.clientY - viewportRect.y;
 
   coordinateEl.innerHTML = `
     <div>좌표 x: ${workspaceX}</div>
     <div>좌표 y: ${workspaceY}</div>
   `;
 
-  if (
-    e.target.classList.contains('node') &&
-    e.target.hasPointerCapture(e.pointerId)
-  ) {
-    const deltaX = e.clientX - previousX;
-    const deltaY = e.clientY - previousY;
+  const deltaX = e.clientX - previousX;
+  const deltaY = e.clientY - previousY;
 
-    previousX = e.clientX;
-    previousY = e.clientY;
+  previousX = e.clientX;
+  previousY = e.clientY;
 
+  if (e.target.closest('.node') && e.target.hasPointerCapture(e.pointerId)) {
     node.moveNode(e.target.id, deltaX, deltaY);
+    return;
+  }
+
+  if (e.target.hasPointerCapture(e.pointerId)) {
+    world.panX += deltaX;
+    world.panY += deltaY;
+
+    worldEl.style.transform = `translate(${world.panX}px, ${world.panY}px)`;
   }
 });

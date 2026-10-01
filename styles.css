@@ -14,12 +14,23 @@ body {
   padding: 20px;
 }
 
-.workspace {
+.header {
+  display: flex;
+  gap: 10px;
+}
+
+.viewport {
   flex: 1;
   position: relative;
   width: 100%;
   background-color: #dddddd;
   overflow: hidden;
+}
+
+.world {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .node {
