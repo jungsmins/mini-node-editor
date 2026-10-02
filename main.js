@@ -8,11 +8,34 @@ const viewportRect = viewportEl.getBoundingClientRect();
 let previousX;
 let previousY;
 
-const world = {
-  panX: 0,
-  panY: 0,
-  scale: 1,
-};
+function createWorld() {
+  let panX = 0;
+  let panY = 0;
+  let scale = 1;
+
+  function pan(x, y) {
+    panX += x;
+    panY += y;
+
+    render();
+  }
+
+  function zoom(deltaY) {
+    scale += deltaY * -0.01;
+    console.log(scale);
+
+    render();
+  }
+
+  function render() {
+    worldEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+  }
+
+  return {
+    pan,
+    zoom,
+  };
+}
 
 function nodes() {
   const nodeList = [];
@@ -51,6 +74,7 @@ function nodes() {
   return { createNode, moveNode };
 }
 
+const world = createWorld();
 const node = nodes();
 
 buttonEl.addEventListener('click', () => {
@@ -85,15 +109,10 @@ viewportEl.addEventListener('pointermove', (e) => {
   }
 
   if (e.target.hasPointerCapture(e.pointerId)) {
-    world.panX += deltaX;
-    world.panY += deltaY;
-
-    worldEl.style.transform = `translate(${world.panX}px, ${world.panY}px)`;
+    world.pan(deltaX, deltaY);
   }
 });
 
 viewportEl.addEventListener('wheel', (e) => {
-  world.scale += e.deltaY * -0.01;
-
-  worldEl.style.transform = `scale(${world.scale})`;
+  world.zoom(e.deltaY);
 });
