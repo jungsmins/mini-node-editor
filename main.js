@@ -20,9 +20,12 @@ function createWorld() {
     render();
   }
 
-  function zoom(deltaY) {
+  function zoom(deltaY, viewportX, viewportY) {
+    const world = viewportToWorld(viewportX, viewportY);
+
     scale += deltaY * -0.01;
-    console.log(scale);
+    panX = viewportX - world.x * scale;
+    panY = viewportY - world.y * scale;
 
     render();
   }
@@ -34,6 +37,20 @@ function createWorld() {
     };
   }
 
+  function viewportToWorld(viewportX, viewportY) {
+    return {
+      x: (viewportX - panX) / scale,
+      y: (viewportY - panY) / scale,
+    };
+  }
+
+  function wolrdToViewport(worldX, worldY) {
+    return {
+      x: worldX * scale + panX,
+      y: worldY * scale + panY,
+    };
+  }
+
   function render() {
     worldEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
   }
@@ -42,6 +59,8 @@ function createWorld() {
     pan,
     zoom,
     viewportDeltaToWorldDelta,
+    viewportToWorld,
+    wolrdToViewport,
   };
 }
 
@@ -97,12 +116,12 @@ viewportEl.addEventListener('pointerdown', (e) => {
 });
 
 viewportEl.addEventListener('pointermove', (e) => {
-  const workspaceX = e.clientX - viewportRect.x;
-  const workspaceY = e.clientY - viewportRect.y;
+  const viewportX = e.clientX - viewportRect.x;
+  const viewportY = e.clientY - viewportRect.y;
 
   coordinateEl.innerHTML = `
-    <div>좌표 x: ${workspaceX}</div>
-    <div>좌표 y: ${workspaceY}</div>
+    <div>좌표 x: ${viewportX}</div>
+    <div>좌표 y: ${viewportY}</div>
   `;
 
   const deltaX = e.clientX - previousX;
@@ -124,5 +143,8 @@ viewportEl.addEventListener('pointermove', (e) => {
 });
 
 viewportEl.addEventListener('wheel', (e) => {
-  world.zoom(e.deltaY);
+  const viewportX = e.clientX - viewportRect.x;
+  const viewportY = e.clientY - viewportRect.y;
+
+  world.zoom(e.deltaY, viewportX, viewportY);
 });
