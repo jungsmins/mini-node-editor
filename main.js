@@ -27,6 +27,13 @@ function createWorld() {
     render();
   }
 
+  function viewportDeltaToWorldDelta(deltaX, deltaY) {
+    return {
+      x: deltaX / scale,
+      y: deltaY / scale,
+    };
+  }
+
   function render() {
     worldEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
   }
@@ -34,6 +41,7 @@ function createWorld() {
   return {
     pan,
     zoom,
+    viewportDeltaToWorldDelta,
   };
 }
 
@@ -103,8 +111,10 @@ viewportEl.addEventListener('pointermove', (e) => {
   previousX = e.clientX;
   previousY = e.clientY;
 
+  const delta = world.viewportDeltaToWorldDelta(deltaX, deltaY);
+
   if (e.target.closest('.node') && e.target.hasPointerCapture(e.pointerId)) {
-    node.moveNode(e.target.id, deltaX, deltaY);
+    node.moveNode(e.target.id, delta.x, delta.y);
     return;
   }
 
