@@ -87,13 +87,15 @@ function nodes() {
     seletedNode.x += x;
     seletedNode.y += y;
 
+    console.log(x, y, seletedNode.x, seletedNode.y);
+
     seletedNode.element.style.transform = `translate(${seletedNode.x}px, ${seletedNode.y}px)`;
   }
 
   function render(node) {
     node.element.id = node.id;
     node.element.classList = 'node';
-    node.element.style = `top: ${node.y}px; left: ${node.x}px`;
+    node.element.style.transform = `translate(${node.x}px, ${node.y}px)`;
 
     worldEl.appendChild(node.element);
   }
@@ -105,7 +107,11 @@ const world = createWorld();
 const node = nodes();
 
 buttonEl.addEventListener('click', () => {
-  node.createNode(0, 0);
+  const viewportX = viewportRect.width / 2;
+  const viewportY = viewportRect.height / 2;
+  const worldPosition = world.viewportToWorld(viewportX, viewportY);
+
+  node.createNode(worldPosition.x, worldPosition.y);
 });
 
 viewportEl.addEventListener('pointerdown', (e) => {
