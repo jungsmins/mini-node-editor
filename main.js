@@ -8,6 +8,11 @@ const viewportRect = viewportEl.getBoundingClientRect();
 let previousX;
 let previousY;
 
+let seletedNode;
+let draggingNode;
+let draggingRect;
+let dropTargetNode;
+
 function createWorld() {
   let panX = 0;
   let panY = 0;
@@ -24,6 +29,8 @@ function createWorld() {
     const world = viewportToWorld(viewportX, viewportY);
 
     scale += deltaY * -0.01;
+    scale = Math.min(Math.max(scale, 0.25), 4);
+
     panX = viewportX - world.x * scale;
     panY = viewportY - world.y * scale;
 
@@ -87,8 +94,6 @@ function nodes() {
     seletedNode.x += x;
     seletedNode.y += y;
 
-    console.log(x, y, seletedNode.x, seletedNode.y);
-
     seletedNode.element.style.transform = `translate(${seletedNode.x}px, ${seletedNode.y}px)`;
   }
 
@@ -100,7 +105,11 @@ function nodes() {
     worldEl.appendChild(node.element);
   }
 
-  return { createNode, moveNode };
+  function getNodeList() {
+    return nodeList;
+  }
+
+  return { createNode, moveNode, getNodeList };
 }
 
 const world = createWorld();
@@ -140,12 +149,50 @@ viewportEl.addEventListener('pointermove', (e) => {
 
   if (e.target.closest('.node') && e.target.hasPointerCapture(e.pointerId)) {
     node.moveNode(e.target.id, delta.x, delta.y);
+
+    const nodeList = node.getNodeList();
+    draggingNode = nodeList.find((node) => node.id === Number(e.target.id));
+    draggingRect = draggingNode.element.getBoundingClientRect();
+
+    dropTargetNode = null;
+
+    for (let i = 0; i < nodeList.length; i++) {
+      if (draggingNode.id === nodeList[i].id) {
+        continue;
+      }
+
+      const nodeRect = nodeList[i].element.getBoundingClientRect();
+
+      const overlapX =
+        nodeRect.left < draggingRect.right &&
+        nodeRect.right > draggingRect.left;
+
+      const overlapY =
+        nodeRect.top < draggingRect.bottom &&
+        nodeRect.bottom > draggingRect.top;
+
+      if (overlapX && overlapY) {
+        dropTargetNode = nodeList[i];
+        break;
+      }
+    }
+
     return;
   }
 
   if (e.target.hasPointerCapture(e.pointerId)) {
     world.pan(deltaX, deltaY);
   }
+});
+
+viewportEl.addEventListener('pointerup', (e) => {
+  if (e.target.closest('.node')) {
+    seletedNode = e.target.id;
+  }
+
+  console.log(seletedNode);
+  seletedNode = null;
+  return;
 });
 
 viewportEl.addEventListener('wheel', (e) => {
