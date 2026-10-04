@@ -42,3 +42,11 @@ body {
   height: 150px;
   background-color: blue;
 }
+
+.select-target {
+  border: 10px solid yellow;
+}
+
+.drop-target {
+  border: 10px solid green;
+}

@@ -125,6 +125,8 @@ buttonEl.addEventListener('click', () => {
 
 viewportEl.addEventListener('pointerdown', (e) => {
   e.target.setPointerCapture(e.pointerId);
+  seletedNode?.element.classList.remove('select-target');
+  seletedNode = null;
 
   previousX = e.clientX;
   previousY = e.clientY;
@@ -154,7 +156,8 @@ viewportEl.addEventListener('pointermove', (e) => {
     draggingNode = nodeList.find((node) => node.id === Number(e.target.id));
     draggingRect = draggingNode.element.getBoundingClientRect();
 
-    dropTargetNode = null;
+    const previousDropTarget = dropTargetNode;
+    let newDropTarget = null;
 
     for (let i = 0; i < nodeList.length; i++) {
       if (draggingNode.id === nodeList[i].id) {
@@ -172,10 +175,17 @@ viewportEl.addEventListener('pointermove', (e) => {
         nodeRect.bottom > draggingRect.top;
 
       if (overlapX && overlapY) {
-        dropTargetNode = nodeList[i];
+        newDropTarget = nodeList[i];
         break;
       }
     }
+
+    if (previousDropTarget !== newDropTarget) {
+      previousDropTarget?.element.classList.remove('drop-target');
+      newDropTarget?.element.classList.add('drop-target');
+    }
+
+    dropTargetNode = newDropTarget;
 
     return;
   }
@@ -187,11 +197,11 @@ viewportEl.addEventListener('pointermove', (e) => {
 
 viewportEl.addEventListener('pointerup', (e) => {
   if (e.target.closest('.node')) {
-    seletedNode = e.target.id;
+    const nodeList = node.getNodeList();
+    seletedNode = nodeList.find((node) => node.id === Number(e.target.id));
+    seletedNode.element.classList.add('select-target');
   }
 
-  console.log(seletedNode);
-  seletedNode = null;
   return;
 });
 
